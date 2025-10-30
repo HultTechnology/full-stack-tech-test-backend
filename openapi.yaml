@@ -72,10 +72,19 @@ paths:
             default: 25
         - name: lastKey
           in: query
-          description: Pagination token from previous response
+          description: |
+            Pagination token from previous response. Use the `lastKey` value returned
+            in a previous response to fetch the next page of results. This is a
+            base64-encoded string that should be passed exactly as received.
+
+            Example workflow:
+            1. Request: GET /events?limit=5
+            2. Response includes: "lastKey": "eyJQSyI6IkVWRU5UIzMiLCJTSyI6Ik1FVEFEQVRBIn0="
+            3. Next request: GET /events?limit=5&lastKey=eyJQSyI6IkVWRU5UIzMiLCJTSyI6Ik1FVEFEQVRBIn0=
           required: false
           schema:
             type: string
+          example: "eyJQSyI6IkVWRU5UIzMiLCJTSyI6Ik1FVEFEQVRBIn0="
       responses:
         '200':
           description: Successful response
@@ -93,7 +102,11 @@ paths:
                     description: Number of events returned
                   lastKey:
                     type: string
-                    description: Pagination token for next page (if more results available)
+                    description: |
+                      Base64-encoded pagination token for fetching the next page of results.
+                      Only present if more results are available. Pass this value to the
+                      `lastKey` query parameter in your next request to continue pagination.
+                    example: "eyJQSyI6IkVWRU5UIzMiLCJTSyI6Ik1FVEFEQVRBIn0="
         '400':
           description: Invalid request
           content:
