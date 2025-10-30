@@ -5,6 +5,7 @@ A serverless REST API for managing events and registrations, built with AWS CDK,
 ## For Technical Test Candidates
 
 You can either:
+
 1. **Use the shared API** - Use the provided API URL and key (quickest option)
 2. **Deploy your own instance** - Fork this repo and deploy to your own AWS account
    - Useful if you want to extend the API for bonus features
@@ -15,6 +16,7 @@ You can either:
 The complete API specification is available in OpenAPI 3.0 format: [openapi.yaml](openapi.yaml)
 
 **Quick Start Options:**
+
 - **Postman Collection**: Import [Tech Test - Full Stack.postman_collection.json](Tech%20Test%20-%20Full%20Stack.postman_collection.json) for ready-to-use API requests
 - **Interactive Docs**: View in [Swagger Editor](https://editor.swagger.io/) by pasting [openapi.yaml](openapi.yaml) contents
 
@@ -81,11 +83,10 @@ npm run deploy
 ```
 
 This will:
+
 - Create the DynamoDB table
 - Deploy Lambda functions
 - Set up API Gateway with CORS
-- Create API key and usage plan
-- Output the API URL and API Key ID
 
 ### 3. Retrieve API Key
 
@@ -93,14 +94,9 @@ After deployment, get your API key from AWS Console:
 
 1. Go to API Gateway console
 2. Navigate to API Keys
-3. Find "events-api-key"
+3. Click "Create API Key"
 4. Click "Show" to reveal the key value
-
-Or use AWS CLI:
-
-```bash
-aws apigateway get-api-key --api-key <API_KEY_ID> --include-value --query 'value' --output text
-```
+5. Assign the key to the "Events API Usage Plan"
 
 ### 4. Seed the database
 
@@ -109,6 +105,7 @@ npm run seed
 ```
 
 This will:
+
 - Automatically export your current AWS session credentials
 - Populate the database with 25 sample events across 5 categories
 
@@ -125,6 +122,7 @@ All requests require the `x-api-key` header with your API key.
 List all events with optional filtering and pagination.
 
 **Query Parameters:**
+
 - `category` (optional): Filter by category ID (e.g., "technology", "business")
 - `search` (optional): Search in title and description
 - `status` (optional): Filter by "available" or "full"
@@ -132,12 +130,14 @@ List all events with optional filtering and pagination.
 - `lastKey` (optional): Pagination token from previous response
 
 **Example:**
+
 ```bash
 curl -X GET "https://<api-url>/events?category=technology&status=available" \
   -H "x-api-key: <your-api-key>"
 ```
 
 **Response:**
+
 ```json
 {
   "events": [...],
@@ -151,12 +151,14 @@ curl -X GET "https://<api-url>/events?category=technology&status=available" \
 Get a single event by ID.
 
 **Example:**
+
 ```bash
 curl -X GET "https://<api-url>/events/1" \
   -H "x-api-key: <your-api-key>"
 ```
 
 **Response:**
+
 ```json
 {
   "event": {
@@ -177,6 +179,7 @@ curl -X GET "https://<api-url>/events/1" \
 Register for an event.
 
 **Body:**
+
 ```json
 {
   "attendeeEmail": "user@example.com",
@@ -186,6 +189,7 @@ Register for an event.
 ```
 
 **Example:**
+
 ```bash
 curl -X POST "https://<api-url>/events/1/register" \
   -H "x-api-key: <your-api-key>" \
@@ -198,6 +202,7 @@ curl -X POST "https://<api-url>/events/1/register" \
 ```
 
 **Success Response:**
+
 ```json
 {
   "success": true,
@@ -208,6 +213,7 @@ curl -X POST "https://<api-url>/events/1/register" \
 ```
 
 **Error Response:**
+
 ```json
 {
   "error": "EVENT_FULL",
@@ -254,6 +260,7 @@ cdk destroy
 ## Sample Data
 
 The seed script creates 25 events across 5 categories:
+
 - Technology (5 events)
 - Business (5 events)
 - Design (5 events)
@@ -261,6 +268,7 @@ The seed script creates 25 events across 5 categories:
 - Health & Wellness (5 events)
 
 Events include:
+
 - 15 available events with various capacity levels
 - 6 nearly full events (1-3 spots remaining)
 - 4 completely full events
