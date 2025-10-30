@@ -2,6 +2,15 @@
 
 A serverless REST API for managing events and registrations, built with AWS CDK, Lambda, API Gateway, and DynamoDB.
 
+## API Documentation
+
+The complete API specification is available in OpenAPI 3.0 format: [openapi.yaml](openapi.yaml)
+
+**View the interactive documentation:**
+1. Go to [Swagger Editor](https://editor.swagger.io/)
+2. Copy the contents of [openapi.yaml](openapi.yaml)
+3. Paste into the editor to see interactive API documentation
+
 ## Architecture
 
 - **AWS CDK** for infrastructure as code

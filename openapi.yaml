@@ -1,0 +1,419 @@
+openapi: 3.0.3
+info:
+  title: Events API
+  description: |
+    A serverless REST API for managing events and registrations.
+
+    Built with AWS CDK, Lambda, API Gateway, and DynamoDB.
+  version: 1.0.0
+  contact:
+    name: API Support
+    url: https://github.com/HultTechnology/full-stack-tech-test-backend
+
+servers:
+  - url: https://{api-id}.execute-api.us-east-1.amazonaws.com/prod
+    description: Production server
+    variables:
+      api-id:
+        default: your-api-id
+        description: API Gateway ID
+
+security:
+  - ApiKeyAuth: []
+
+tags:
+  - name: Events
+    description: Event management and registration
+
+paths:
+  /events:
+    get:
+      tags:
+        - Events
+      summary: List events
+      description: Retrieve a list of events with optional filtering and pagination
+      operationId: listEvents
+      parameters:
+        - name: category
+          in: query
+          description: Filter by category ID
+          required: false
+          schema:
+            type: string
+            enum:
+              - technology
+              - business
+              - design
+              - marketing
+              - health
+        - name: search
+          in: query
+          description: Case-insensitive search in title and description
+          required: false
+          schema:
+            type: string
+        - name: status
+          in: query
+          description: Filter by availability status
+          required: false
+          schema:
+            type: string
+            enum:
+              - available
+              - full
+        - name: limit
+          in: query
+          description: Number of results to return
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 25
+        - name: lastKey
+          in: query
+          description: Pagination token from previous response
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  events:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Event'
+                  total:
+                    type: integer
+                    description: Number of events returned
+                  lastKey:
+                    type: string
+                    description: Pagination token for next page (if more results available)
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /events/{id}:
+    get:
+      tags:
+        - Events
+      summary: Get event by ID
+      description: Retrieve details for a single event
+      operationId: getEvent
+      parameters:
+        - name: id
+          in: path
+          description: Event ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  event:
+                    $ref: '#/components/schemas/Event'
+        '404':
+          description: Event not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: EVENT_NOT_FOUND
+                message: Event not found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /events/{id}/register:
+    post:
+      tags:
+        - Events
+      summary: Register for event
+      description: Register an attendee for an event with validation
+      operationId: registerForEvent
+      parameters:
+        - name: id
+          in: path
+          description: Event ID
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegistrationRequest'
+      responses:
+        '200':
+          description: Registration successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistrationResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                eventFull:
+                  value:
+                    error: EVENT_FULL
+                    message: Event has reached maximum capacity
+                duplicateRegistration:
+                  value:
+                    error: DUPLICATE_REGISTRATION
+                    message: This email is already registered for this event
+                invalidEmail:
+                  value:
+                    error: INVALID_EMAIL
+                    message: Please provide a valid email address
+                insufficientCapacity:
+                  value:
+                    error: INSUFFICIENT_CAPACITY
+                    message: Not enough spots available for group size
+                invalidRequest:
+                  value:
+                    error: INVALID_REQUEST
+                    message: 'Missing required fields: attendeeEmail, attendeeName'
+        '404':
+          description: Event not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: EVENT_NOT_FOUND
+                message: Event not found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: API key for authentication
+
+  schemas:
+    Event:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique event identifier
+          example: '1'
+        title:
+          type: string
+          description: Event title
+          example: React Fundamentals Workshop
+        description:
+          type: string
+          description: Detailed event description
+          example: Learn React basics in a hands-on workshop covering components, hooks, and state management.
+        date:
+          type: string
+          format: date-time
+          description: Event date and time in ISO 8601 format
+          example: '2025-01-15T09:00:00Z'
+        category:
+          $ref: '#/components/schemas/Category'
+        capacity:
+          $ref: '#/components/schemas/Capacity'
+        pricing:
+          $ref: '#/components/schemas/Pricing'
+        location:
+          $ref: '#/components/schemas/Location'
+      required:
+        - id
+        - title
+        - description
+        - date
+        - category
+        - capacity
+        - pricing
+        - location
+
+    Category:
+      type: object
+      properties:
+        id:
+          type: string
+          enum:
+            - technology
+            - business
+            - design
+            - marketing
+            - health
+          example: technology
+        name:
+          type: string
+          example: Technology
+        color:
+          type: string
+          description: Hex color code
+          example: '#3B82F6'
+      required:
+        - id
+        - name
+        - color
+
+    Capacity:
+      type: object
+      properties:
+        max:
+          type: integer
+          minimum: 1
+          description: Maximum number of attendees
+          example: 30
+        registered:
+          type: integer
+          minimum: 0
+          description: Current number of registered attendees
+          example: 15
+      required:
+        - max
+        - registered
+
+    Pricing:
+      type: object
+      properties:
+        individual:
+          type: number
+          minimum: 0
+          description: Price per individual attendee in USD
+          example: 50
+      required:
+        - individual
+
+    Location:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - physical
+            - online
+          example: physical
+        address:
+          type: string
+          description: Physical address (only for physical events)
+          example: 123 Tech St, Boston, MA
+      required:
+        - type
+
+    RegistrationRequest:
+      type: object
+      properties:
+        attendeeEmail:
+          type: string
+          format: email
+          description: Attendee email address
+          example: john@example.com
+        attendeeName:
+          type: string
+          minLength: 1
+          description: Attendee name
+          example: John Doe
+        groupSize:
+          type: integer
+          minimum: 1
+          default: 1
+          description: Number of attendees in the group
+          example: 2
+      required:
+        - attendeeEmail
+        - attendeeName
+
+    RegistrationResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        registrationId:
+          type: string
+          description: Unique registration identifier
+          example: reg_1730294400000_abc123xyz
+        event:
+          $ref: '#/components/schemas/Event'
+        attendee:
+          type: object
+          properties:
+            email:
+              type: string
+              format: email
+              example: john@example.com
+            name:
+              type: string
+              example: John Doe
+            groupSize:
+              type: integer
+              example: 2
+            registeredAt:
+              type: string
+              format: date-time
+              example: '2025-10-30T11:30:00.000Z'
+      required:
+        - success
+        - registrationId
+        - event
+        - attendee
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Machine-readable error code
+          enum:
+            - EVENT_NOT_FOUND
+            - EVENT_FULL
+            - DUPLICATE_REGISTRATION
+            - INVALID_EMAIL
+            - INVALID_REQUEST
+            - INSUFFICIENT_CAPACITY
+            - INTERNAL_ERROR
+          example: EVENT_NOT_FOUND
+        message:
+          type: string
+          description: Human-readable error message
+          example: Event not found
+      required:
+        - error
+        - message
+
+x-rate-limits:
+  rateLimit: 100 requests/second
+  burstLimit: 200 requests
+  dailyQuota: 10000 requests/day
