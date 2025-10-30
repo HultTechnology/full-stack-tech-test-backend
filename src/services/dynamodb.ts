@@ -172,20 +172,34 @@ export async function registerForEvent(
   const registrationId = `reg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   const registeredAt = new Date().toISOString();
 
-  // First, update event capacity atomically
+  // First, get the current event to check capacity
+  const event = await getEvent(eventId);
+  if (!event) {
+    throw new Error("EVENT_NOT_FOUND");
+  }
+
+  // Check if there's enough capacity
+  const newRegistered = event.capacity.registered + groupSize;
+  if (newRegistered > event.capacity.max) {
+    throw new Error("INSUFFICIENT_CAPACITY");
+  }
+
+  // Update event capacity atomically with optimistic locking
   const updateCommand = new UpdateItemCommand({
     TableName: TABLE_NAME,
     Key: marshall({
       PK: `EVENT#${eventId}`,
       SK: "METADATA",
     }),
-    UpdateExpression: "SET capacity.registered = capacity.registered + :increment",
-    ConditionExpression: "capacity.registered + :increment <= capacity.#max",
+    UpdateExpression: "SET #capacity.#registered = :newRegistered",
+    ConditionExpression: "#capacity.#registered = :currentRegistered",
     ExpressionAttributeNames: {
-      "#max": "max",
+      "#capacity": "capacity",
+      "#registered": "registered",
     },
     ExpressionAttributeValues: marshall({
-      ":increment": groupSize,
+      ":newRegistered": newRegistered,
+      ":currentRegistered": event.capacity.registered,
     }),
     ReturnValues: "ALL_NEW",
   });
@@ -196,6 +210,7 @@ export async function registerForEvent(
     updatedEvent = unmarshall(updateResult.Attributes!);
   } catch (error: any) {
     if (error.name === "ConditionalCheckFailedException") {
+      // Someone else updated the capacity in the meantime
       throw new Error("INSUFFICIENT_CAPACITY");
     }
     throw error;
