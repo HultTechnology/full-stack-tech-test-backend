@@ -2,14 +2,21 @@
 
 A serverless REST API for managing events and registrations, built with AWS CDK, Lambda, API Gateway, and DynamoDB.
 
+## For Technical Test Candidates
+
+You can either:
+1. **Use the shared API** - Use the provided API URL and key (quickest option)
+2. **Deploy your own instance** - Fork this repo and deploy to your own AWS account
+   - Useful if you want to extend the API for bonus features
+   - Requires AWS account and credentials configured
+
 ## API Documentation
 
 The complete API specification is available in OpenAPI 3.0 format: [openapi.yaml](openapi.yaml)
 
-**View the interactive documentation:**
-1. Go to [Swagger Editor](https://editor.swagger.io/)
-2. Copy the contents of [openapi.yaml](openapi.yaml)
-3. Paste into the editor to see interactive API documentation
+**Quick Start Options:**
+- **Postman Collection**: Import [Tech Test - Full Stack.postman_collection.json](Tech%20Test%20-%20Full%20Stack.postman_collection.json) for ready-to-use API requests
+- **Interactive Docs**: View in [Swagger Editor](https://editor.swagger.io/) by pasting [openapi.yaml](openapi.yaml) contents
 
 ## Architecture
 
