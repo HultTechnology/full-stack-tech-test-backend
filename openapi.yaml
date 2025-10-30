@@ -5,6 +5,20 @@ info:
     A serverless REST API for managing events and registrations.
 
     Built with AWS CDK, Lambda, API Gateway, and DynamoDB.
+
+    ## Authentication
+
+    All requests require an API key passed in the `x-api-key` header:
+
+    ```
+    x-api-key: your-api-key-here
+    ```
+
+    Example curl request:
+    ```bash
+    curl -X GET "https://api-url/prod/events" \
+      -H "x-api-key: your-api-key"
+    ```
   version: 1.0.0
   contact:
     name: API Support
