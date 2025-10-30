@@ -1,0 +1,48 @@
+{
+	"info": {
+		"_postman_id": "6c08b72d-0ae1-4ba1-974f-86536f2023ee",
+		"name": "Tech Test - Full Stack",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "39436247"
+	},
+	"item": [
+		{
+			"name": "Events",
+			"request": {
+				"auth": {
+					"type": "apikey",
+					"apikey": [
+						{
+							"key": "value",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "key",
+							"value": "x-api-key",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://x15zoj9on9.execute-api.us-east-1.amazonaws.com/prod/events",
+					"protocol": "https",
+					"host": [
+						"x15zoj9on9",
+						"execute-api",
+						"us-east-1",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"prod",
+						"events"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
