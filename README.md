@@ -92,7 +92,11 @@ aws apigateway get-api-key --api-key <API_KEY_ID> --include-value --query 'value
 npm run seed
 ```
 
-This will populate the database with 25 sample events across 5 categories.
+This will:
+- Automatically export your current AWS session credentials
+- Populate the database with 25 sample events across 5 categories
+
+**Note**: If using AWS SSO, ensure you have an active session (`aws sso login` if needed).
 
 ## API Endpoints
 

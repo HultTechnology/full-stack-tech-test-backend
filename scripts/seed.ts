@@ -2,10 +2,17 @@
 
 import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
 import { marshall } from "@aws-sdk/util-dynamodb";
+import { fromNodeProviderChain } from "@aws-sdk/credential-providers";
 import { events } from "../src/data/seedEvents";
 
-const client = new DynamoDBClient({});
+const region = process.env.AWS_REGION || process.env.AWS_DEFAULT_REGION || "us-east-1";
+const client = new DynamoDBClient({
+  region,
+  credentials: fromNodeProviderChain()
+});
 const TABLE_NAME = process.env.TABLE_NAME || "events-table";
+
+console.log(`Using AWS Region: ${region}`);
 
 async function seedEvents() {
   console.log(`Seeding ${events.length} events to table: ${TABLE_NAME}`);
@@ -36,6 +43,7 @@ async function seedEvents() {
     } catch (error: any) {
       errorCount++;
       console.error(`✗ Failed to seed event ${event.id}:`, error.message);
+      console.error(`   Full error:`, JSON.stringify(error, null, 2));
     }
   }
 

@@ -6,7 +6,7 @@
     "build": "tsc",
     "cdk": "cdk",
     "deploy": "npm run build && cdk deploy",
-    "seed": "ts-node scripts/seed.ts",
+    "seed": "./scripts/seed.sh",
     "synth": "cdk synth",
     "diff": "cdk diff"
   },
@@ -25,13 +25,14 @@
   "devDependencies": {
     "@types/aws-lambda": "^8.10.157",
     "@types/node": "^24.9.2",
-    "aws-cdk-lib": "^2.221.1",
+    "aws-cdk-lib": "^2.179.0",
     "constructs": "^10.4.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.920.0",
+    "@aws-sdk/credential-providers": "^3.920.0",
     "@aws-sdk/lib-dynamodb": "^3.920.0",
     "source-map-support": "^0.5.21"
   }
